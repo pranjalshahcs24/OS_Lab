@@ -1,0 +1,247 @@
+1.FCFS
+
+#include <stdio.h>
+
+int main()
+{
+    int n, i;
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    int at[n], bt[n], ct[n], tat[n], wt[n];
+
+    printf("Enter Arrival Time:\n");
+    for(i = 0; i < n; i++)
+        scanf("%d", &at[i]);
+
+    printf("Enter Burst Time:\n");
+    for(i = 0; i < n; i++)
+        scanf("%d", &bt[i]);
+
+    int t = 0;
+
+    for(i = 0; i < n; i++)
+    {
+        if(t < at[i])
+            t = at[i];
+
+        ct[i] = t + bt[i];
+        t = ct[i];
+
+        tat[i] = ct[i] - at[i];
+        wt[i] = tat[i] - bt[i];
+    }
+
+    printf("\nProcess\tAT\tBT\tCT\tTAT\tWT\n");
+    for(i = 0; i < n; i++)
+    {
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\n",
+               i+1, at[i], bt[i], ct[i], tat[i], wt[i]);
+    }
+
+    return 0;
+}
+
+OUTPUT:
+Enter number of processes: 4
+Enter Arrival Time:
+0
+0
+0
+0
+Enter Burst Time:
+7
+3
+4
+6
+
+Process AT      BT      CT      TAT     WT
+P1      0       7       7       7       0
+P2      0       3       10      10      7
+P3      0       4       14      14      10
+P4      0       6       20      20      14
+
+2.SJF non preemptive
+
+#include <stdio.h>
+
+int main()
+{
+    int n, i;
+
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    int at[n], bt[n], ct[n], tat[n], wt[n];
+    int done[n];
+
+    printf("Enter Arrival Time:\n");
+    for(i = 0; i < n; i++)
+    {
+        scanf("%d", &at[i]);
+        done[i] = 0;
+    }
+
+    printf("Enter Burst Time:\n");
+    for(i = 0; i < n; i++)
+        scanf("%d", &bt[i]);
+
+    int t = 0, completed = 0;
+
+    while(completed < n)
+    {
+        int min = 9999;
+        int index = -1;
+
+        for(i = 0; i < n; i++)
+        {
+            if(at[i] <= t && done[i] == 0)
+            {
+                if(bt[i] < min)
+                {
+                    min = bt[i];
+                    index = i;
+                }
+            }
+        }
+
+        if(index == -1)
+        {
+            t++;                                                                                                                                                                                                                                                                               
+        }
+        else
+        {
+            ct[index] = t + bt[index];
+            t = ct[index];
+
+            tat[index] = ct[index] - at[index];
+            wt[index] = tat[index] - bt[index];
+
+            done[index] = 1;
+            completed++;
+        }
+    }
+
+    printf("\nProcess\tAT\tBT\tCT\tTAT\tWT\n");
+
+    for(i = 0; i < n; i++)
+    {
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\n",
+               i+1, at[i], bt[i], ct[i], tat[i], wt[i]);
+    }
+
+    return 0;
+}
+
+OUTPUT:
+Enter number of processes: 4
+Enter Arrival Time:
+0
+8
+3
+5
+Enter Burst Time:
+7
+3
+4
+6
+
+Process AT      BT      CT      TAT     WT
+P1      0       7       7       7       0
+P2      8       3       14      6       3
+P3      3       4       11      8       4
+P4      5       6       20      15      9
+
+3.SRTF (SJF Preemptive)
+
+#include <stdio.h>
+
+int main()
+{
+    int n, i;
+
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    int at[n], bt[n], rt[n], ct[n], tat[n], wt[n];
+
+    printf("Enter Arrival Time:\n");
+    for(i = 0; i < n; i++)
+        scanf("%d", &at[i]);
+
+    printf("Enter Burst Time:\n");
+    for(i = 0; i < n; i++)
+    {
+        scanf("%d", &bt[i]);
+        rt[i] = bt[i];
+    }
+
+    int t = 0, completed = 0;
+
+    while(completed < n)
+    {
+        int min = 9999;
+        int index = -1;
+
+        for(i = 0; i < n; i++)
+        {
+            if(at[i] <= t && rt[i] > 0)
+            {
+                if(rt[i] < min)
+                {
+                    min = rt[i];
+                    index = i;
+                }
+            }
+        }
+
+        if(index == -1)
+        {
+            t++;
+        }
+        else
+        {
+            rt[index]--;
+            t++;
+
+            if(rt[index] == 0)
+            {
+                ct[index] = t;
+                completed++;
+
+                tat[index] = ct[index] - at[index];
+                wt[index] = tat[index] - bt[index];
+            }
+        }
+    }
+
+    printf("\nProcess\tAT\tBT\tCT\tTAT\tWT\n");
+
+    for(i = 0; i < n; i++)
+    {
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\n",
+               i+1, at[i], bt[i], ct[i], tat[i], wt[i]);
+    }
+
+    return 0;
+}
+
+OUTPUT:
+
+Enter number of processes: 4
+Enter Arrival Time:
+0
+1
+2
+3
+Enter Burst Time:
+8
+4
+9
+5
+
+Process AT      BT      CT      TAT     WT
+P1      0       8       17      17      9
+P2      1       4       5       4       0
+P3      2       9       26      24      15
+P4      3       5       10      7       2
