@@ -1,0 +1,157 @@
+Multi-Level Queue
+
+#include <stdio.h>
+
+int main()
+{
+    int n, i;
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    int at[n], bt[n], rt[n], ct[n], tat[n], wt[n], q[n];
+
+    printf("Enter Arrival Time:\n");
+    for(i = 0; i < n; i++)
+        scanf("%d", &at[i]);
+
+    printf("Enter Burst Time:\n");
+    for(i = 0; i < n; i++)
+    {
+        scanf("%d", &bt[i]);
+        rt[i] = bt[i];
+    }
+
+    printf("Enter Queue (1 = RR, 2 = FCFS):\n");
+    for(i = 0; i < n; i++)
+        scanf("%d", &q[i]);
+
+    int tq;
+    printf("Enter Time Quantum: ");
+    scanf("%d", &tq);
+
+    int t = 0, completed = 0;
+
+    printf("\nGantt Chart:\n| ");
+
+    while(completed < n)
+    {
+        int found = 0;
+
+
+        for(i = 0; i < n; i++)
+        {
+            if(q[i] == 1 && rt[i] > 0 && at[i] <= t)
+            {
+                int exec = (rt[i] > tq) ? tq : rt[i];
+
+                for(int k = 0; k < exec; k++)
+                {
+                    printf("P%d ", i+1);
+                    t++;
+                }
+
+                rt[i] -= exec;
+
+                if(rt[i] == 0)
+                {
+                    ct[i] = t;
+                    completed++;
+                }
+
+                found = 1;
+            }
+        }
+
+        
+        if(!found)
+        {
+            for(i = 0; i < n; i++)
+            {
+                if(q[i] == 2 && rt[i] > 0 && at[i] <= t)
+                {
+                  
+                    while(rt[i] > 0)
+                    {
+                        // check if any Q1 arrives → break
+                        int interrupt = 0;
+                        for(int j = 0; j < n; j++)
+                        {
+                            if(q[j] == 1 && rt[j] > 0 && at[j] <= t)
+                            {
+                                interrupt = 1;
+                                break;
+                            }
+                        }
+
+                        if(interrupt) break;
+
+                        printf("P%d ", i+1);
+                        rt[i]--;
+                        t++;
+                    }
+
+                    if(rt[i] == 0)
+                    {
+                        ct[i] = t;
+                        completed++;
+                    }
+
+                    found = 1;
+                }
+            }
+        }
+
+        // CPU idle
+        if(!found)
+        {
+            printf("Idle ");
+            t++;
+        }
+    }
+
+    printf("|\n");
+
+    // Calculate TAT & WT
+    for(i = 0; i < n; i++)
+    {
+        tat[i] = ct[i] - at[i];
+        wt[i] = tat[i] - bt[i];
+    }
+
+    printf("\nProcess\tAT\tBT\tCT\tTAT\tWT\n");
+    for(i = 0; i < n; i++)
+    {
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\n",
+               i+1, at[i], bt[i], ct[i], tat[i], wt[i]);
+    }
+
+    return 0;
+}
+
+OUTPUT:
+Enter number of processes: 4
+Enter Arrival Time:
+0
+0
+0
+10
+Enter Burst Time:
+4
+3
+8
+5
+Enter Queue (1 = RR, 2 = FCFS):
+1
+1
+2
+1
+Enter Time Quantum: 2
+
+Gantt Chart:
+| P1 P1 P2 P2 P1 P1 P2 P3 P3 P3 P4 P4 P4 P4 P4 P3 P3 P3 P3 P3 |
+
+Process AT      BT      CT      TAT     WT
+P1      0       4       6       6       2
+P2      0       3       7       7       4
+P3      0       8       20      20      12
+P4      10      5       15      5       0
